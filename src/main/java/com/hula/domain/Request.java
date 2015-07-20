@@ -1,5 +1,6 @@
 package com.hula.domain;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -9,12 +10,12 @@ public class Request {
 
     private String ip;
     private Integer requestCount = 0;
-    private Date dateOfLastRequest;
+    private Timestamp dateOfLastRequest;
 
     public Request() {
     }
 
-    public Request(String ip, Integer requestCount, Date dateOfLastRequest) {
+    public Request(String ip, Integer requestCount, Timestamp dateOfLastRequest) {
         this.ip = ip;
         this.requestCount = requestCount;
         this.dateOfLastRequest = dateOfLastRequest;
@@ -36,17 +37,17 @@ public class Request {
         this.requestCount = requestCount;
     }
 
-    public Date getDateOfLastRequest() {
+    public Timestamp getDateOfLastRequest() {
         return dateOfLastRequest;
     }
 
-    public void setDateOfLastRequest(Date dateOfLastRequest) {
+    public void setDateOfLastRequest(Timestamp dateOfLastRequest) {
         this.dateOfLastRequest = dateOfLastRequest;
     }
 
     @Override
     public String toString() {
-        return ip + "            " + requestCount + "           "  + dateOfLastRequest;
+        return String.format("%-15s%-19s%-25s", ip, requestCount, dateOfLastRequest);
     }
 
     @Override

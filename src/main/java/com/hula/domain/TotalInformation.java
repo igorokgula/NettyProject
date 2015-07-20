@@ -5,6 +5,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -36,7 +37,7 @@ public class TotalInformation {
         return instance;
     }
 
-    public synchronized void onRequest(String ipAddress, Date date, String url) {
+    public synchronized void onRequest(String ipAddress, Timestamp time, String url) {
         requestTotal++;
 
         if (url.equals(URL_HELLO)) {
@@ -47,13 +48,13 @@ public class TotalInformation {
             requestTotalStatus++;
         }
 
-        Request request = new Request(ipAddress, 1, date);
+        Request request = new Request(ipAddress, 1, time);
         if (!requests.contains(request)) {
             requests.add(request);
         } else {
             Request r = requests.get(requests.indexOf(request));
             r.setRequestCount(r.getRequestCount() + 1);
-            r.setDateOfLastRequest(date);
+            r.setDateOfLastRequest(time);
         }
     }
 
@@ -61,7 +62,11 @@ public class TotalInformation {
         fullRequestMap.add(fullRequest);
     }
 
-    public String getFullRequestsString(Integer countOfRecords) {
+    public synchronized void addChannel(Channel channel) {
+        channels.add(channel);
+    }
+
+    public String getFullRequestsInfo(Integer countOfRecords) {
         StringBuffer stringBuffer = new StringBuffer();
         Integer size = (countOfRecords > fullRequestMap.size()) ? fullRequestMap.size() : countOfRecords;
         for (int i = 0; i < size; i++) {
@@ -70,11 +75,7 @@ public class TotalInformation {
         return stringBuffer.toString();
     }
 
-    public synchronized void addChannel(Channel channel) {
-        channels.add(channel);
-    }
-
-    public String getRequestsString() {
+    public String getRequestsInfo() {
         StringBuffer stringBuffer = new StringBuffer();
         for (Request r: requests) {
             stringBuffer.append(r.toString() + "\r\n");

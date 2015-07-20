@@ -40,7 +40,7 @@ public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandl
 
             String path = ((Routed)msg).path();
 
-            TotalInformation.getInstance().onRequest(ip, new Date(), path);
+            TotalInformation.getInstance().onRequest(ip, new Timestamp(System.currentTimeMillis()), path);
             TotalInformation.getInstance().onFullRequest(new FullRequest(ip, path,
                     new Timestamp(System.currentTimeMillis()), writtenBytes, readBytes, speed));
         }

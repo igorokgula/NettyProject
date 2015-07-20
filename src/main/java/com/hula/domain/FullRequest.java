@@ -75,7 +75,6 @@ public class FullRequest {
 
     @Override
     public String toString() {
-        return ip + "      " + uri + "              " + time + "          " + sentBytes +
-                "                    " + receivedBytes +"                       " + speed;
+        return String.format("%-15s%-15s%-35s%-15s%-20s%-15s", ip, uri, time, sentBytes, receivedBytes, speed);
     }
 }
