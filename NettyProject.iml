@@ -14,5 +14,6 @@
     <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.29.Final" level="project" />
     <orderEntry type="library" name="Maven: tv.cntt:netty-router:1.10" level="project" />
     <orderEntry type="library" name="Maven: tv.cntt:jauter:1.7" level="project" />
+    <orderEntry type="library" name="Maven: com.hp.gagawa:gagawa:1.0.1" level="project" />
   </component>
 </module>

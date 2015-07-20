@@ -1,11 +1,13 @@
 package com.hula.domain;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Igor on 19.07.2015.
  */
-public class FullRequest {
+public class FullRequest implements Cloneable {
     private String ip;
     private String uri;
     private Timestamp time;
@@ -76,5 +78,23 @@ public class FullRequest {
     @Override
     public String toString() {
         return String.format("%-15s%-15s%-35s%-15s%-20s%-15s", ip, uri, time, sentBytes, receivedBytes, speed);
+    }
+
+    @Override
+    public FullRequest clone() throws CloneNotSupportedException {
+        FullRequest clone = new FullRequest(ip, uri, new Timestamp(time.getTime()), sentBytes, receivedBytes, speed);
+        return clone;
+    }
+
+    public List<String> toStrings() {
+        List<String> rez = new ArrayList<String>();
+        rez.add(this.getIp());
+        rez.add(this.getUri());
+        rez.add(this.getTime().toString());
+        rez.add(this.getSentBytes().toString());
+        rez.add(this.getReceivedBytes().toString());
+        rez.add(this.getSpeed().toString());
+
+        return rez;
     }
 }

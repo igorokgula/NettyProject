@@ -20,7 +20,11 @@
             <artifactId>netty-router</artifactId>
             <version>1.10</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.hp.gagawa</groupId>
+            <artifactId>gagawa</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
     </dependencies>
 

@@ -19,6 +19,10 @@ import java.util.Date;
  */
 public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandler {
 
+    private FullRequest fullRequest;
+
+    private boolean flag = true;
+
     public HttpChannelTrafficShapingHandler(long checkInterval) {
         super(checkInterval);
     }
@@ -26,24 +30,20 @@ public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandl
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("HttpChannelTrafficShapingHandler");
-        requestInf(ctx, msg);
-        super.channelRead(ctx, msg);
-    }
 
-    public void requestInf(ChannelHandlerContext channelHandlerContext, Object msg) {
+        System.out.println(msg.getClass());
         if (msg instanceof Routed) {
-            String ip = getIP(channelHandlerContext);
-
-            Long readBytes = trafficCounter.cumulativeReadBytes();
-            Long writtenBytes = trafficCounter.cumulativeWrittenBytes();
-            Long speed = trafficCounter.lastReadBytes();
+            System.out.println("1");
+            String ip = getIP(ctx);
 
             String path = ((Routed)msg).path();
 
             TotalInformation.getInstance().onRequest(ip, new Timestamp(System.currentTimeMillis()), path);
-            TotalInformation.getInstance().onFullRequest(new FullRequest(ip, path,
-                    new Timestamp(System.currentTimeMillis()), writtenBytes, readBytes, speed));
+            fullRequest = new FullRequest(ip, path,
+                    new Timestamp(System.currentTimeMillis()), 0L, 0L, 0L);
+            TotalInformation.getInstance().onFullRequest(fullRequest);
         }
+        super.channelRead(ctx, msg);
     }
 
     private String getIP(ChannelHandlerContext channelHandlerContext) {
@@ -56,5 +56,25 @@ public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandl
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         TotalInformation.getInstance().addChannel(ctx.channel());
         super.channelActive(ctx);
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        super.handlerAdded(ctx);
+        System.out.println("START");
+        this.trafficCounter().start();
+    }
+
+    @Override
+    public synchronized void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+        this.trafficCounter().stop();
+        System.out.println("STOP");
+        System.out.println(fullRequest);
+        System.out.println(trafficCounter());
+        Long speed = (this.trafficCounter().cumulativeReadBytes() + this.trafficCounter().cumulativeReadBytes())
+                /(System.currentTimeMillis() - fullRequest.getTime().getTime());
+        TotalInformation.getInstance().setConnectionInfo(fullRequest, this.trafficCounter().cumulativeReadBytes(),
+                this.trafficCounter().cumulativeWrittenBytes(), speed);
     }
 }

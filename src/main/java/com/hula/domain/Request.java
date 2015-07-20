@@ -1,12 +1,14 @@
 package com.hula.domain;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Igor on 18.07.2015.
  */
-public class Request {
+public class Request implements Cloneable{
 
     private String ip;
     private Integer requestCount = 0;
@@ -65,5 +67,20 @@ public class Request {
     public int hashCode() {
         int result = ip != null ? ip.hashCode() : 0;
         return result;
+    }
+
+    @Override
+    public Request clone() throws CloneNotSupportedException {
+        Request clone = new Request(ip, requestCount, new Timestamp(dateOfLastRequest.getTime()));
+        return clone;
+    }
+
+    public List<String> toStrings() {
+        List<String> rez = new ArrayList<String>();
+        rez.add(this.getIp());
+        rez.add(this.getRequestCount().toString());
+        rez.add(this.getDateOfLastRequest().toString());
+
+        return rez;
     }
 }
