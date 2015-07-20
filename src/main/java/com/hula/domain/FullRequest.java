@@ -6,21 +6,31 @@ import java.sql.Timestamp;
  * Created by Igor on 19.07.2015.
  */
 public class FullRequest {
+    private String ip;
     private String uri;
     private Timestamp time;
-    private Integer sentBytes;
-    private Integer receivedBytes;
-    private Integer speed;
+    private Long sentBytes;
+    private Long receivedBytes;
+    private Long speed;
 
     public FullRequest() {
     }
 
-    public FullRequest(String uri, Timestamp time, Integer sentBytes, Integer receivedBytes, Integer speed) {
+    public FullRequest(String ip, String uri, Timestamp time, Long sentBytes, Long receivedBytes, Long speed) {
+        this.ip = ip;
         this.uri = uri;
         this.time = time;
         this.sentBytes = sentBytes;
         this.receivedBytes = receivedBytes;
         this.speed = speed;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public String getUri() {
@@ -39,27 +49,33 @@ public class FullRequest {
         this.time = time;
     }
 
-    public Integer getSentBytes() {
+    public Long getSentBytes() {
         return sentBytes;
     }
 
-    public void setSentBytes(Integer sentBytes) {
+    public void setSentBytes(Long sentBytes) {
         this.sentBytes = sentBytes;
     }
 
-    public Integer getReceivedBytes() {
+    public Long getReceivedBytes() {
         return receivedBytes;
     }
 
-    public void setReceivedBytes(Integer receivedBytes) {
+    public void setReceivedBytes(Long receivedBytes) {
         this.receivedBytes = receivedBytes;
     }
 
-    public Integer getSpeed() {
+    public Long getSpeed() {
         return speed;
     }
 
-    public void setSpeed(Integer speed) {
+    public void setSpeed(Long speed) {
         this.speed = speed;
+    }
+
+    @Override
+    public String toString() {
+        return ip + "      " + uri + "              " + time + "          " + sentBytes +
+                "                    " + receivedBytes +"                       " + speed;
     }
 }

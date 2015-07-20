@@ -1,13 +1,20 @@
 package com.hula.domain;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import io.netty.channel.Channel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.util.*;
 
 /**
  * Created by Igor on 18.07.2015.
  */
 public class TotalInformation {
+
+    private static final String URL_STATUS = "/status";
+    private static final String URL_REDIRECT = "/redirect";
+    private static final String URL_HELLO = "/hello";
 
     private static final TotalInformation instance = new TotalInformation();
 
@@ -17,9 +24,11 @@ public class TotalInformation {
     private Integer requestTotalRedirect = 0;
     private Integer requestTotalStatus = 0;
 
-    private Map<String, Request> requestMap = new HashMap<String, Request>();
+    private List<Request> requests = new ArrayList<Request>();
 
-    private Map<String, FullRequest> fullRequestMap = new HashMap<String, FullRequest>();
+    private List<FullRequest> fullRequestMap = new ArrayList<FullRequest>();
+
+    private ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     private TotalInformation(){}
 
@@ -27,39 +36,54 @@ public class TotalInformation {
         return instance;
     }
 
-    public synchronized void onRequest(String ipAddress, Date date) {
+    public synchronized void onRequest(String ipAddress, Date date, String url) {
         requestTotal++;
-        Request request = requestMap.get(ipAddress);
-        if (request == null) {
-            Request newRequest = new Request();
-            newRequest.setRequestCount(1);
-            newRequest.setDateOfLastRequest(date);
-            requestMap.put(ipAddress, newRequest);
+
+        if (url.equals(URL_HELLO)) {
+            requestTotalHello++;
+        } else if (url.equals(URL_REDIRECT)) {
+            requestTotalRedirect++;
+        } else if (url.equals(URL_STATUS)) {
+            requestTotalStatus++;
+        }
+
+        Request request = new Request(ipAddress, 1, date);
+        if (!requests.contains(request)) {
+            requests.add(request);
         } else {
-            Integer oldRequestCount = request.getRequestCount();
-            request.setRequestCount(oldRequestCount + 1);
-            request.setDateOfLastRequest(date);
+            Request r = requests.get(requests.indexOf(request));
+            r.setRequestCount(r.getRequestCount() + 1);
+            r.setDateOfLastRequest(date);
         }
     }
 
-    public synchronized void onFullRequest(String ip, FullRequest fullRequest) {
-        fullRequestMap.put(ip, fullRequest);
+    public synchronized void onFullRequest(FullRequest fullRequest) {
+        fullRequestMap.add(fullRequest);
     }
 
-    public synchronized void onRequestHello() {
-        requestTotalHello++;
+    public String getFullRequestsString(Integer countOfRecords) {
+        StringBuffer stringBuffer = new StringBuffer();
+        Integer size = (countOfRecords > fullRequestMap.size()) ? fullRequestMap.size() : countOfRecords;
+        for (int i = 0; i < size; i++) {
+            stringBuffer.append(fullRequestMap.get(fullRequestMap.size() - size + i).toString() + "\r\n");
+        }
+        return stringBuffer.toString();
     }
 
-    public synchronized void onRequestRedirect() {
-        requestTotalRedirect++;
+    public synchronized void addChannel(Channel channel) {
+        channels.add(channel);
     }
 
-    public synchronized void onRequestStatus() {
-        requestTotalStatus++;
+    public String getRequestsString() {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (Request r: requests) {
+            stringBuffer.append(r.toString() + "\r\n");
+        }
+        return stringBuffer.toString();
     }
 
-    public synchronized Map<String, Request> getRequestMap() {
-        return requestMap;
+    public Integer getRequestsSize() {
+        return requests.size();
     }
 
     public Integer getRequestTotal() {
@@ -78,7 +102,7 @@ public class TotalInformation {
         return requestTotalStatus;
     }
 
-    public Map<String, FullRequest> getFullRequestMap() {
-        return fullRequestMap;
+    public Integer getChannelsSize() {
+        return channels.size();
     }
 }

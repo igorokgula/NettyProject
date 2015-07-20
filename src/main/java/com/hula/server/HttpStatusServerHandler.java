@@ -2,78 +2,35 @@ package com.hula.server;
 
 import com.hula.domain.Request;
 import com.hula.domain.TotalInformation;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.handler.codec.DecoderResult;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpObject;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.ServerCookieEncoder;
-import io.netty.util.CharsetUtil;
-import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.handler.codec.http.router.Routed;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
-import static io.netty.handler.codec.http.HttpVersion.*;
 
 /**
  * Created by Igor on 18.07.2015.
  */
-public class HttpStatusServerHandler extends SimpleChannelInboundHandler<Object> {
-
-    private Map<String, Request> requestMap = new HashMap<String, Request>();
-
-    private ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
-    private HttpRequest request;
+public class HttpStatusServerHandler extends ChannelInboundHandlerAdapter {
 
     private final StringBuilder buf = new StringBuilder();
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
-
-    }
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        TotalInformation.getInstance().onRequestStatus();
-
-        buf.setLength(0);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         buf.append("STATUS\r\n");
         buf.append("===================================\r\n");
 
         buf.append("TOTAL REQUESTS: " + TotalInformation.getInstance().getRequestTotal() + "\r\n");
 
-        buf.append("UNIQUE TOTAL REQUESTS: " + TotalInformation.getInstance().getRequestMap().size() + "\r\n\n");
+        buf.append("UNIQUE TOTAL REQUESTS: " + TotalInformation.getInstance().getRequestsSize() + "\r\n\n");
 
-        buf.append("REQUEST COUNTER:\r\n");
+        buf.append("REQUEST COUNTER\r\n");
         buf.append("IP ADDRESS     TOTAL REQUESTS                   LAST REQUEST\r\n");
 
         TotalInformation totalInf = TotalInformation.getInstance();
-        for (Map.Entry<String, Request> requestEntry : totalInf.getRequestMap().entrySet()) {
-            buf.append(requestEntry.getKey() + "           " + requestEntry.getValue().getRequestCount() +
-                    "                " + requestEntry.getValue().getDateOfLastRequest() + "\r\n");
-        }
+        buf.append(TotalInformation.getInstance().getRequestsString());
 
         buf.append("\r\n");
         buf.append("URL ADDRESSES: \r\n");
@@ -82,19 +39,30 @@ public class HttpStatusServerHandler extends SimpleChannelInboundHandler<Object>
                 totalInf.getRequestTotalRedirect() + "                  " +
                 totalInf.getRequestTotalStatus() + "\r\n");
 
-        buf.append("ALL CONNECTIONS: " + channels.size() + "\r\n");
+        buf.append("ALL CONNECTIONS: " + TotalInformation.getInstance().getChannelsSize() + "\r\n");
 
+        buf.append("LAST 16\r\n");
+        buf.append("SRC_IP         URI                     TIMESTAMP                     SENT_BYTES        " +
+                "RECEIVED_BYTES               SPEED\r\n");
+        if (msg instanceof LastHttpContent) {
+            System.out.println();
+        }
+        buf.append(TotalInformation.getInstance().getFullRequestsString(16));
 
+        System.out.println(buf);
+//        System.out.println(TotalInformation.getInstance().getChannelsSize());
+//        System.out.println(TotalInformation.getInstance().getRequestTotal());
 
-        System.out.println(buf.toString());
+        ctx.writeAndFlush(buf);
 
-        ctx.flush();
+        buf.setLength(0);
+
+        super.channelRead(ctx, msg);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("connection active");
-        channels.add(ctx.channel());
+        super.channelActive(ctx);
     }
 
     @Override
@@ -102,4 +70,5 @@ public class HttpStatusServerHandler extends SimpleChannelInboundHandler<Object>
         cause.printStackTrace();
         ctx.close();
     }
+
 }
