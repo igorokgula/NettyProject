@@ -1,34 +1,30 @@
 package com.hula.server;
 
+import com.hula.domain.FullRequest;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.http.router.Handler;
-import io.netty.handler.codec.http.router.Router;
+
+import java.sql.Timestamp;
 
 /**
  * Created by Igor on 18.07.2015.
  */
 public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
-    private static final Router router = new Router()
-            .GET("/hello", HttpHelloWorldServerHandler.class)
-            .GET("/redirect", HttpRedirectServerHandler.class)
-            .GET("/status", HttpStatusServerHandler.class);
-
-    private static final Handler handler = new Handler(router);
-
     @Override
     public void initChannel(SocketChannel ch) {
         ChannelPipeline p = ch.pipeline();
+        FullRequest fullRequest = new FullRequest();
+        fullRequest.setTime(new Timestamp(System.currentTimeMillis()));
 
-        p.addLast("generalHandler", new HttpChannelTrafficShapingHandler(0));
+        p.addLast("generalHandler", new HttpChannelTrafficShapingHandler(600000, fullRequest));
         p.addLast(new HttpRequestDecoder());
         p.addLast(new HttpResponseEncoder());
         p.addLast(new HttpContentCompressor());
-        p.addLast(handler.name(), handler);
+        p.addLast(new HttpServerHandler(fullRequest));
     }
 }

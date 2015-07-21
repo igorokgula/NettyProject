@@ -15,7 +15,10 @@ public class TotalInformation {
 
     private static final TotalInformation instance = new TotalInformation();
 
+    private static final Integer MAX_FULL_REQUESTS_COUNT = 1000;
+
     private Integer requestTotal = 0;
+
 
     private List<Request> requests = new ArrayList<Request>();
 
@@ -31,7 +34,7 @@ public class TotalInformation {
         return instance;
     }
 
-    public synchronized void onRequest(String ipAddress, Timestamp time, String url) {
+    public synchronized void onRequest(String ipAddress, Timestamp time) {
         requestTotal++;
 
         Request request = new Request(ipAddress, 1, time);
@@ -46,6 +49,9 @@ public class TotalInformation {
 
     public synchronized void onFullRequest(FullRequest fullRequest) {
         fullRequests.add(fullRequest);
+        if (fullRequests.size() > MAX_FULL_REQUESTS_COUNT) {
+            fullRequests.remove(0);
+        }
     }
 
     public synchronized void addChannel(Channel channel) {

@@ -8,14 +8,11 @@ import java.util.List;
 /**
  * Created by Igor on 18.07.2015.
  */
-public class Request implements Cloneable{
+public class Request {
 
     private String ip;
     private Integer requestCount = 0;
     private Timestamp dateOfLastRequest;
-
-    public Request() {
-    }
 
     public Request(String ip, Integer requestCount, Timestamp dateOfLastRequest) {
         this.ip = ip;
@@ -25,10 +22,6 @@ public class Request implements Cloneable{
 
     public String getIp() {
         return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
     }
 
     public Integer getRequestCount() {

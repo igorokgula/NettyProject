@@ -90,10 +90,10 @@ public class FullRequest implements Cloneable {
         List<String> rez = new ArrayList<String>();
         rez.add(this.getIp());
         rez.add(this.getUri());
-        rez.add(this.getTime().toString());
-        rez.add(this.getSentBytes().toString());
-        rez.add(this.getReceivedBytes().toString());
-        rez.add(this.getSpeed().toString());
+        rez.add(this.getTime() == null ? "" : this.getTime().toString());
+        rez.add(this.getSentBytes() == null ? "" : this.getSentBytes().toString());
+        rez.add(this.getReceivedBytes() == null ? "" : this.getReceivedBytes().toString());
+        rez.add(this.getSpeed() == null ? "" : this.getSpeed().toString());
 
         return rez;
     }
