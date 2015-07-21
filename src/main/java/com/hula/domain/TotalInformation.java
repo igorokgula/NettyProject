@@ -51,7 +51,7 @@ public class TotalInformation {
         }
     }
 
-    public void onFullRequest(FullRequest fullRequest) {
+    public synchronized void onFullRequest(FullRequest fullRequest) {
         fullRequests.add(fullRequest);
         if (fullRequests.size() > MAX_FULL_REQUESTS_COUNT) {
             fullRequests.remove(0);
@@ -64,7 +64,7 @@ public class TotalInformation {
         }
     }
 
-    public void onRedirect(String url) {
+    public synchronized void onRedirect(String url) {
         if (redirects.containsKey(url)) {
             redirects.put(url, redirects.get(url) + 1);
         } else {
