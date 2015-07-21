@@ -43,7 +43,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
         if (o instanceof HttpRequest) {
             request = (HttpRequest) o;
             invokeRightMethod(channelHandlerContext);
-            fullRequest.setUri(request.getUri());
+            fullRequest.setUrl(request.getUri());
         }
     }
 
@@ -163,7 +163,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
                 Unpooled.copiedBuffer(buf.toString(), CharsetUtil.UTF_8));
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=utf-8");
 
-        ctx.writeAndFlush(response);
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     private Tr appendRow(List<String> strings) {

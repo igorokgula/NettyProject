@@ -13,7 +13,6 @@ import java.sql.Timestamp;
  * Created by Igor on 20.07.2015.
  */
 public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandler {
-
     private FullRequest fullRequest;
 
     public HttpChannelTrafficShapingHandler(long checkInterval, FullRequest fullRequest) {
@@ -42,7 +41,6 @@ public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandl
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         super.handlerAdded(ctx);
-        System.out.println(1);
         this.trafficCounter().start();
         fullRequest.setIp(getIP(ctx));
         TotalInformation.getInstance().onFullRequest(fullRequest);
@@ -54,7 +52,8 @@ public class HttpChannelTrafficShapingHandler extends ChannelTrafficShapingHandl
         this.trafficCounter().stop();
         Long speed = (1000*(this.trafficCounter().cumulativeReadBytes() + this.trafficCounter().cumulativeReadBytes()))
                 /(System.currentTimeMillis() - fullRequest.getTime().getTime());
-        TotalInformation.getInstance().setConnectionInfo(fullRequest, this.trafficCounter().cumulativeReadBytes(),
-                this.trafficCounter().cumulativeWrittenBytes(), speed);
+        fullRequest.setSendBytes(this.trafficCounter().cumulativeWrittenBytes());
+        fullRequest.setReceivedBytes(this.trafficCounter().cumulativeReadBytes());
+        fullRequest.setSpeed(speed);
     }
 }

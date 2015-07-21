@@ -7,6 +7,8 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Igor on 18.07.2015.
@@ -20,11 +22,11 @@ public class TotalInformation {
     private Integer requestTotal = 0;
 
 
-    private List<Request> requests = new ArrayList<Request>();
+    private List<Request> requests = new CopyOnWriteArrayList<Request>();
 
-    private List<FullRequest> fullRequests = new ArrayList<FullRequest>();
+    private List<FullRequest> fullRequests = new CopyOnWriteArrayList<FullRequest>();
 
-    private Map<String, Long> redirects = new HashMap<String, Long>();
+    private Map<String, Long> redirects = new ConcurrentHashMap<String, Long>();
 
     private ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
@@ -34,8 +36,10 @@ public class TotalInformation {
         return instance;
     }
 
-    public synchronized void onRequest(String ipAddress, Timestamp time) {
-        requestTotal++;
+    public void onRequest(String ipAddress, Timestamp time) {
+        synchronized (this) {
+            requestTotal++;
+        }
 
         Request request = new Request(ipAddress, 1, time);
         if (!requests.contains(request)) {
@@ -47,30 +51,25 @@ public class TotalInformation {
         }
     }
 
-    public synchronized void onFullRequest(FullRequest fullRequest) {
+    public void onFullRequest(FullRequest fullRequest) {
         fullRequests.add(fullRequest);
         if (fullRequests.size() > MAX_FULL_REQUESTS_COUNT) {
             fullRequests.remove(0);
         }
     }
 
-    public synchronized void addChannel(Channel channel) {
-        channels.add(channel);
+    public void addChannel(Channel channel) {
+        synchronized (this) {
+            channels.add(channel);
+        }
     }
 
-    public synchronized void onRedirect(String url) {
+    public void onRedirect(String url) {
         if (redirects.containsKey(url)) {
             redirects.put(url, redirects.get(url) + 1);
         } else {
             redirects.put(url, 1L);
         }
-    }
-
-    public synchronized void setConnectionInfo(FullRequest fullRequest, Long sendBytes, Long receivedBytes, Long speed) {
-        FullRequest fr = fullRequests.get(fullRequests.indexOf(fullRequest));
-        fr.setSentBytes(sendBytes);
-        fr.setReceivedBytes(receivedBytes);
-        fr.setSpeed(speed);
     }
 
     public List<FullRequest> getFullRequestsInfo(Integer countOfRecords){

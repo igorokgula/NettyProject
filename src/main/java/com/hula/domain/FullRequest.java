@@ -9,20 +9,20 @@ import java.util.List;
  */
 public class FullRequest implements Cloneable {
     private String ip;
-    private String uri;
+    private String url;
     private Timestamp time;
-    private Long sentBytes;
+    private Long sendBytes;
     private Long receivedBytes;
     private Long speed;
 
     public FullRequest() {
     }
 
-    public FullRequest(String ip, String uri, Timestamp time, Long sentBytes, Long receivedBytes, Long speed) {
+    public FullRequest(String ip, String url, Timestamp time, Long sendBytes, Long receivedBytes, Long speed) {
         this.ip = ip;
-        this.uri = uri;
+        this.url = url;
         this.time = time;
-        this.sentBytes = sentBytes;
+        this.sendBytes = sendBytes;
         this.receivedBytes = receivedBytes;
         this.speed = speed;
     }
@@ -35,12 +35,12 @@ public class FullRequest implements Cloneable {
         this.ip = ip;
     }
 
-    public String getUri() {
-        return uri;
+    public String getUrl() {
+        return url;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public Timestamp getTime() {
@@ -51,12 +51,12 @@ public class FullRequest implements Cloneable {
         this.time = time;
     }
 
-    public Long getSentBytes() {
-        return sentBytes;
+    public Long getSendBytes() {
+        return sendBytes;
     }
 
-    public void setSentBytes(Long sentBytes) {
-        this.sentBytes = sentBytes;
+    public void setSendBytes(Long sendBytes) {
+        this.sendBytes = sendBytes;
     }
 
     public Long getReceivedBytes() {
@@ -77,21 +77,21 @@ public class FullRequest implements Cloneable {
 
     @Override
     public String toString() {
-        return String.format("%-15s%-15s%-35s%-15s%-20s%-15s", ip, uri, time, sentBytes, receivedBytes, speed);
+        return String.format("%-15s%-15s%-35s%-15s%-20s%-15s", ip, url, time, sendBytes, receivedBytes, speed);
     }
 
     @Override
     public FullRequest clone() throws CloneNotSupportedException {
-        FullRequest clone = new FullRequest(ip, uri, new Timestamp(time.getTime()), sentBytes, receivedBytes, speed);
+        FullRequest clone = new FullRequest(ip, url, new Timestamp(time.getTime()), sendBytes, receivedBytes, speed);
         return clone;
     }
 
     public List<String> toStrings() {
         List<String> rez = new ArrayList<String>();
         rez.add(this.getIp());
-        rez.add(this.getUri());
+        rez.add(this.getUrl());
         rez.add(this.getTime() == null ? "" : this.getTime().toString());
-        rez.add(this.getSentBytes() == null ? "" : this.getSentBytes().toString());
+        rez.add(this.getSendBytes() == null ? "" : this.getSendBytes().toString());
         rez.add(this.getReceivedBytes() == null ? "" : this.getReceivedBytes().toString());
         rez.add(this.getSpeed() == null ? "" : this.getSpeed().toString());
 
