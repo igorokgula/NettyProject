@@ -36,10 +36,8 @@ public class TotalInformation {
         return instance;
     }
 
-    public void onRequest(String ipAddress, Timestamp time) {
-        synchronized (this) {
-            requestTotal++;
-        }
+    public synchronized void onRequest(String ipAddress, Timestamp time) {        
+        requestTotal++;
 
         Request request = new Request(ipAddress, 1, time);
         if (!requests.contains(request)) {
